@@ -58,14 +58,19 @@ angular.module('mosaic')
           doc.data = parseObject(doc.data);
           return doc;
         },
-        parseMultiDoc: function(src, reason) {
+        parseMultiDoc: function(src, reason, cb) {
           var doc = parseDoc(src);
           var okay = doc && angular.isArray(doc.data);
           if (!okay) {
             throw reason;
           }
-          doc.data = doc.data.map(parseObject);
-
+          if (cb) {
+            doc.data.map(function(x) {
+              cb(parseObject(x));
+            });
+          } else {
+            doc.data = doc.data.map(parseObject);
+          }
           return doc;
         }, // parseMulti
 

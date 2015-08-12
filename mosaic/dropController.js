@@ -15,10 +15,10 @@ angular.module('mosaic')
       var lastRot = 0;
       var lastTile;
       var lastIndex = -1;
-      var start = function(tile, index) {
+      var start = function(tileId, tileIdx) {
         $scope.step.size = DragService.sprite.width;
-        lastTile = tile;
-        lastIndex = index;
+        lastTile = tileId;
+        lastIndex = tileIdx;
       };
       var stop = function() {
         // place the tile into the map:

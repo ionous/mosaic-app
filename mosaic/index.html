@@ -10,20 +10,15 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Mosaic</title>
-  <meta name="description" content="">
+  <meta name="description" content="A 2d-tile editor written in angularjs.">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="/bower_components/html5-boilerplate/css/normalize.css">
-  <link rel="stylesheet" href="/bower_components/html5-boilerplate/css/main.css">
+  <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="/tiles.css">
   <link rel="stylesheet" href="mosaic.css">
-  <!--
-  <script src="/bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
-  <script src="/bower_components/angular/angular.js"></script>
-  <script src="/bower_components/angular-route/angular-route.js"></script>
-  -->
-  <link rel="stylesheet" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" />
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.min.js"></script>
+  <script src="/bower_components/angular/angular.min.js"></script>
+  <script src="/bower_components/angular-animate/angular-animate.min.js"></script>
+  <script src="/bower_components/angular-route/angular-route.min.js"></script>
+  <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
   <script src="mosaic.js"></script>
   <script src="autoFocus.js"></script>
   <script src="jsonService.js"></script>
@@ -32,6 +27,7 @@
   <script src="layerController.js"></script>
   <script src="dropController.js"></script>
   <script src="drawController.js"></script>
+  <script src="rawController.js"></script>
   <script src="mapService.js"></script>
   <script src="tileListController.js"></script>
 </head>
@@ -40,29 +36,20 @@
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
-  <div class="Top">Mosaic</div>
+  <div class="Top">
+  <h1>Mosaic</h1><h2></h2>
+  </div>
   <div class="Container">
-    <div class="Left" id="tiles" ng-controller="TileListController">
-      <div ng-repeat="tile in tiles" class="tile-outer">
-        {{tile.id}}
-        <div>
-          <div ng-repeat="sprite in tile.attr.sprites" ng-class="['T'+sprite.size, currentTile === sprite ? 'selectedTile' : 'normalTile']">
-            <div ng-class="['tileImage', tile.id,'T'+sprite.size+'-'+sprite.y+'-'+sprite.x]" ng-mousedown="onDown($event,tile,$index)">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="Middle" ng-controller="LayerController">
-      <div id="canvii" >
-        <canvas id="viewport" width="512" height="512" ng-controller="DrawController">
-        </canvas>
-        <canvas id="scratch" width="512" height="512" ng-controller="DropController" ng-mousemove="canvasMove($event)">
-        </canvas>
-      </div>
-      <div>
-        Pos (x: {{coords.x}}({{mouse.x}}), y: {{coords.y}}({{mouse.y}}))
-      </div>
+    <div class="Left" ng-include="'tileList.html'"></div>
+    <div class="Middle">
+      <tabset>
+        <tab heading="Edit">
+        <ng-include src="'edit.html'">
+        </tab>
+        <tab heading="Raw">
+        <ng-include src="'rawView.html'">
+        </tab>
+      </tabset>
     </div>
   </div>
 </body>

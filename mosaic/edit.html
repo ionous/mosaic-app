@@ -1,0 +1,11 @@
+<div ng-controller="LayerController">
+  <div id="canvii">
+    <canvas id="viewport" width="512" height="512" ng-controller="DrawController">
+    </canvas>
+    <canvas id="scratch" width="512" height="512" ng-controller="DropController" ng-mousemove="canvasMove($event)">
+    </canvas>
+  </div>
+  <div>
+    Pos (x: {{coords.x}}({{mouse.x}}), y: {{coords.y}}({{mouse.y}}))
+  </div>
+</div>

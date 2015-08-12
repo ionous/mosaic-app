@@ -86,9 +86,13 @@ angular.module('mosaic')
           //
           var url = '/tiles';
           $http.get(url).then(function(resp) {
-            var doc = JsonService.parseMultiDoc(resp.data, "getTileList");
+            var tiles = {};
+            JsonService.parseMultiDoc(resp.data, "getTileList",
+              function(obj) {
+                tiles[obj.id] = obj;
+              });
             // parse this tile list into something more locally useful?
-            deferred.resolve(doc.data);
+            deferred.resolve(tiles);
           }, deferred.reject);
           //
           return deferred.promise;
@@ -98,6 +102,17 @@ angular.module('mosaic')
         getSprite: function(tile, index) {
           var sprite = new Sprite(tile, index);
           return sprite;
+        },
+
+        // promise a sprite for the indexed tileId.
+        getSpriteById: function(tileId, index) {
+          var deferred = $q.defer();
+          tileService.getTiles().then(function(tiles) {
+            var tile = tiles[tileId]
+            var sprite = new Sprite(tile, index);
+            deferred.resolve(sprite);
+          }, deferred.reject);
+          return deferred.promise;
         },
       };
       return tileService;

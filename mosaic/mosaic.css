@@ -26,11 +26,7 @@ body {
 
 .Top {
   display: flex;
-  font-size: 2.5rem;
   position: relative;
-  /*z-index: 10;*/
-  height: 75px;
-  left: 12.5rem;
 }
 
 
@@ -65,7 +61,7 @@ WebKit inertia scrolling is being added here for any present/future devices that
 /*  Left and Right are set sizes while the Middle is set to flex one so it occupies all remaining space. This could be set as a width too if prefereable, perhaps using calc.*/
 
 .Left {
-  width: 12.5rem;
+  width: 20rem;
 }
 
 .Right {
@@ -118,5 +114,16 @@ WebKit inertia scrolling is being added here for any present/future devices that
   -moz-filter: grayscale(100%);
   -ms-filter: grayscale(100%);
   -o-filter: grayscale(100%);
-  filter: gray; 
+  filter: gray;
+}
+
+/*
+https://angular-ui.github.io/bootstrap/ 
+*/
+
+.nav,
+.pagination,
+.carousel,
+.panel-title a {
+  cursor: pointer;
 }

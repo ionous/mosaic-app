@@ -119,7 +119,7 @@ angular.module('mosaic')
           dragService.sprite = sprite;
 
           for (var key in subscribers) {
-            subscribers[key].start(tile, index);
+            subscribers[key].start(tile.id, index);
           }
           // setup first position
           onMove(evt);

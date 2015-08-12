@@ -14,28 +14,92 @@ function pt(x, y) {
   };
 }
 
-// a map is a hash of x,y position -> object
+/**
+ * a map is a hash of x,y position -> object
+ */
 var Map = function() {
-  this.map = {};
+  this.data = {};
 };
 
 // return an element for the passed x,y position, or create one if it doesnt exist.
 Map.prototype.getOrCreate = function(x, y, cb) {
   var id = mapId(x, y);
-  if (!(id in this.map)) {
+  if (!(id in this.data)) {
     var map = cb(id, x, y);
-    this.map[id] = map;
+    this.data[id] = map;
   }
-  return this.map[id];
+  return this.data[id];
 };
 
-// a layer contains a map of grids.
-// all grids in the layer have width*height pixels.
+// return an element for the passed x,y position
+Map.prototype.get = function(x, y) {
+  var id = mapId(x, y);
+  return this.data[id];
+};
+
+/**
+ * a wrapper for a single cell; created by the Grid.
+ */
+var Cell = function(grid, index) {
+  if (!grid) {
+    throw new Error("invalid grid");
+  }
+  this._grid = grid;
+  this._index = index;
+};
+Cell.prototype.cellIndex = function() {
+  return this._index;
+};
+Cell.prototype.cellPos = function() {
+  return this._grid.layer.cellIndexToPos(this._index);
+};
+Cell.prototype.grid = function() {
+  return this._grid;
+};
+Cell.prototype.tileId = function() {
+  return this._grid.raw[this._index][0];
+};
+Cell.prototype.tileIndex = function() {
+  return this._grid.raw[this._index][1];
+};
+Cell.prototype.tileRot = function() {
+  return this._grid.raw[this._index][2];
+};
+
+/**
+ * wraps the array of grid data; created by the Layer.
+ */
+var Grid = function(layer, gx, gy, raw) {
+  if (!layer) {
+    throw new Error("invalid layer");
+  }
+  this.layer = layer;
+  this.ofs = pt(gx, gy);
+  this.raw = raw;
+};
+
+// FIX: cleanup the location of layer.cellIndex, layer.cell
+Grid.prototype.cellByPixel = function(pix) {
+  var cell = this.layer.cellPos(pix);
+  var index = this.layer.cellIndex(cell);
+  return new Cell(this, index);
+}
+
+// FIX: cleanup the location of layer.cellIndex, layer.cell
+Grid.prototype.cellByIndex = function(index) {
+  return new Cell(this, index);
+}
+
+
+/**
+ * A map of grids.
+ * all grids in the layer have width*height pixels.
+ */
 var Layer = function(id, cells, pixels) {
   this.id = id;
-  this.cells = cells;
-  this.pixels = pixels;
-  this.cellSize = pt( pixels.x / cells.x, pixels.y / cells.y);
+  this.cells = cells; // number of cells wide,high
+  this.pixels = pixels; // number of pixels wide,high
+  this.cellSize = pt(pixels.x / cells.x, pixels.y / cells.y); // size in pixel of each cell
   this.grids = new Map();
 };
 
@@ -43,13 +107,14 @@ var Layer = function(id, cells, pixels) {
 Layer.prototype.grid = function(pix) {
   var gx = Math.floor(pix.x / this.pixels.x);
   var gy = Math.floor(pix.y / this.pixels.y);
-  return this.grids.getOrCreate(gx, gy, function() {
-    return [];
+  var layer= this; // pin "this" for use in callback.
+  return layer.grids.getOrCreate(gx, gy, function() {
+    return new Grid(layer, gx, gy, []);
   });
 };
 
-// return cell index within a grid.
-Layer.prototype.cell = function(pix) {
+// return cell x,y within a grid.
+Layer.prototype.cellPos = function(pix) {
   var px = pix.x % this.pixels.x;
   var cx = Math.floor(px / this.cellSize.x);
   if (cx < 0) {
@@ -68,7 +133,7 @@ Layer.prototype.cellIndex = function(cell) {
 };
 
 // expand a cell index into a position.
-Layer.prototype.cellPos = function(cellIndex) {
+Layer.prototype.cellIndexToPos = function(cellIndex) {
   var cy = Math.floor(cellIndex / this.cells.x);
   var cx = cellIndex % this.cells.x;
   return pt(cx * this.cellSize.x, cy * this.cellSize.y);
@@ -92,7 +157,7 @@ angular.module('mosaic')
         // search for a tile size which can best hold the passed pixel position.
         // ( ex. if its a 32 pixel aligned position, use the 32 pixel grid. )
         getTileSize: function(pix) {
-           var tileSize = pt(1);
+          var tileSize = pt(1);
           // might be better to use granularity directly...
           for (var i = 0; i < gridSizes.length; i++) {
             var sz = gridSizes[i];
@@ -105,28 +170,65 @@ angular.module('mosaic')
         },
 
         // find the grid size which can best hold the passed pixel position.
-        getLayer: function(pix) {
-          var tileSize= mapService.getTileSize(pix);
+        getBestLayer: function(pix) {
+          var tileSize = mapService.getTileSize(pix);
           return layers.getOrCreate(tileSize.x, tileSize.y, function(id) {
             var pixels = pt(tileSize.x * cells.x, tileSize.y * cells.y);
             return new Layer(id, cells, pixels);
           });
         },
 
+        // return array of json data
+        mapData: function() {
+          var rawMap = []; // an array of layers
+          mapService.gridSizes.map(function(sz) {
+            var layer = layers.get(sz.x, sz.y);
+            if (layer) {
+              var rawLayer = {
+                x: layer.cellSize.x,
+                y: layer.cellSize.y,
+                grids: []
+              };
+              rawMap.push(rawLayer);
+              var layerData= layer.grids.data;  // tricky :(
+              for (var k in layerData) {
+                var grid = layerData[k];
+                var rawGrid = {
+                  x: grid.ofs.x,
+                  y: grid.ofs.y,
+                  data: grid.raw
+                };
+                rawLayer.grids.push(rawGrid);
+              }
+            }
+          });
+          return rawMap;
+        },
+
         // add the passed tile to the world at the passed pixel position with the passed rotation.
-        place: function(tile, index, pix, rot) {
+        place: function(tileId, tileIdx, pix, rot) {
           // create the data needed for the map.
-          var data = [tile, index, rot];
+          var data = [tileId, tileIdx, rot];
           // pick the best layer for this position.
-          var layer = mapService.getLayer(pix);
+          var layer = mapService.getBestLayer(pix);
+          if (!layer) {
+            throw new Error("couldnt find layer for" + pix);
+          }
           // pick the floating grid within that layer.
           var grid = layer.grid(pix);
+          if (!grid) {
+            throw new Error("couldnt find grid for" + pix);
+          }
           // find the cell index on that grid.
-          var cell = layer.cellIndex(layer.cell(pix));
-          // store the data.
-          grid[cell] = data;
+          var cell = grid.cellByPixel(pix);
+          if (!cell) {
+            throw new Error("couldnt find cell for" + pix);
+          }
+          // store the data; FIX: sure is nice and object oriented :(
+          grid.raw[cell._index] = data;
           // let everyone known the map has changed.
-          $rootScope.$broadcast('tilePlaced', layer, grid, cell);
+          $rootScope.$broadcast('tilePlaced', cell);
+          return cell;
         },
       };
 

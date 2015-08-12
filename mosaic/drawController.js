@@ -8,18 +8,19 @@ angular.module('mosaic')
   .controller('DrawController',
     function(MapService, TileService, $element, $log, $scope) {
       var canvas = $element[0];
-      $scope.$on('tilePlaced', function(evt, layer, grid, cell) {
-        var d = grid[cell];
-        var tile = d[0];
-        var index = d[1];
-        var rot = d[2];
+      $scope.$on('tilePlaced', function(evt, cell) {
         //
-        var pos= layer.cellPos(cell);
-        $log.info("placed", cell, pos);
+        var pos = cell.cellPos();
+        var rot = cell.tileRot();
+        $log.info("placed", cell.cellIndex(), pos, rot);
         //
-        var sprite = TileService.getSprite(tile, index);
-        var ctx = $element[0].getContext("2d");
-        sprite.clearAt(ctx, pos);
-        sprite.drawAt(ctx, pos, rot);
+        TileService.getSpriteById(cell.tileId(), cell.tileIndex()).then(function(sprite) {
+          $log.info("drawing...");
+          var ctx = $element[0].getContext("2d");
+          sprite.clearAt(ctx, pos);
+          sprite.drawAt(ctx, pos, rot);
+        }, function() {
+          $log.info("rejected!");
+        });
       });
     });

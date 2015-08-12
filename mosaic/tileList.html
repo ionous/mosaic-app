@@ -1,0 +1,11 @@
+<div ng-controller="TileListController">
+  <div ng-repeat="tile in tiles" class="tile-outer">
+    {{tile.id}}
+    <div>
+      <div ng-repeat="sprite in tile.attr.sprites" ng-class="['T'+sprite.size, currentTile === sprite ? 'selectedTile' : 'normalTile']">
+        <div ng-class="['tileImage', tile.id,'T'+sprite.size+'-'+sprite.y+'-'+sprite.x]" ng-mousedown="onDown($event,tile,$index)">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
