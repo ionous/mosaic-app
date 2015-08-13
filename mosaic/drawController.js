@@ -7,20 +7,30 @@
 angular.module('mosaic')
   .controller('DrawController',
     function(MapService, TileService, $element, $log, $scope) {
-      var canvas = $element[0];
+      // alt: target the correct scope with 'tilePlaced'
+      var index = $scope.$index;
+      var sizes = $scope.layerSizes;
+      if (angular.isUndefined(sizes) || angular.isUndefined(index)) {
+        throw new Error("DrawController must exist in the scope of CanviiController");
+      }
+
+      var size = sizes[index];
       $scope.$on('tilePlaced', function(evt, cell) {
-        //
-        var pos = cell.cellPos();
-        var rot = cell.tileRot();
-        $log.info("placed", cell.cellIndex(), pos, rot);
-        //
-        TileService.getSpriteById(cell.tileId(), cell.tileIndex()).then(function(sprite) {
-          $log.info("drawing...");
-          var ctx = $element[0].getContext("2d");
-          sprite.clearAt(ctx, pos);
-          sprite.drawAt(ctx, pos, rot);
-        }, function() {
-          $log.info("rejected!");
-        });
+        if (!pt_eq(cell.grid.layer.cellSize, size)) {
+          //$log.info("didnt matched layer", cell.grid.layer.cellSize, size);
+        } else {
+          var canvas = $element[0];
+          var pos = cell.cellPos();
+          var rot = cell.tileRot();
+          $log.info("placed", canvas.id, cell.cellIndex(), pos, rot);
+          //
+          TileService.getSpriteById(cell.tileId(), cell.tileIndex()).then(function(sprite) {
+            var ctx = canvas.getContext("2d");
+            sprite.clearAt(ctx, pos);
+            sprite.drawAt(ctx, pos, rot);
+          }, function() {
+            $log.info("rejected!");
+          });
+        }
       });
     });

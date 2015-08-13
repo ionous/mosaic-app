@@ -10,6 +10,7 @@ module.exports = function(config) {
       "bower_components/angular-animate/angular-animate.js",
       "bower_components/angular-bootstrap/ui-bootstrap-tpls.js",
       'mosaic/mosaic.js',
+      'mosaic/point.js',
       'mosaic/**/*.js'
     ],
 

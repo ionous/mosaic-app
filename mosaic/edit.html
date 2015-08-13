@@ -1,8 +1,13 @@
 <div ng-controller="LayerController">
+  <div>
+    <div class="btn-group" ng-controller="RadioController">
+      <label ng-repeat="size in layerSizes" class="btn btn-primary" ng-model="stepIndex" ng-model-options="{ getterSetter: true }" btn-radio="$index">{{sizeLabel(size)}}</label>
+    </div>
+  </div>
   <div id="canvii">
-    <canvas id="viewport" width="512" height="512" ng-controller="DrawController">
+    <canvas class="mapLayer" id="{{'canvas'+sizeId(size)}}" ng-repeat="size in layerSizes" width="{{layerSize.x}}" height="{{layerSize.y}}" ng-controller="DrawController">
     </canvas>
-    <canvas id="scratch" width="512" height="512" ng-controller="DropController" ng-mousemove="canvasMove($event)">
+    <canvas id="scratch" width="{{layerSize.x}}" height="{{layerSize.y}}" ng-controller="DropController" ng-mousemove="canvasMove($event)">
     </canvas>
   </div>
   <div>

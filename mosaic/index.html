@@ -21,14 +21,17 @@
   <script src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
   <script src="mosaic.js"></script>
   <script src="autoFocus.js"></script>
-  <script src="jsonService.js"></script>
+  <script src="point.js"></script>
   <script src="dragService.js"></script>
+  <script src="jsonService.js"></script>
+  <script src="mapService.js"></script>
+  <script src="stepService.js"></script>
   <script src="tileService.js"></script>
-  <script src="layerController.js"></script>
   <script src="dropController.js"></script>
   <script src="drawController.js"></script>
+  <script src="layerController.js"></script>
+  <script src="radioController.js"></script>
   <script src="rawController.js"></script>
-  <script src="mapService.js"></script>
   <script src="tileListController.js"></script>
 </head>
 
@@ -37,17 +40,18 @@
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
   <![endif]-->
   <div class="Top">
-  <h1>Mosaic</h1><h2></h2>
+    <h1>Mosaic</h1>
+    <h2></h2>
   </div>
   <div class="Container">
     <div class="Left" ng-include="'tileList.html'"></div>
     <div class="Middle">
       <tabset>
         <tab heading="Edit">
-        <ng-include src="'edit.html'">
+          <ng-include src="'edit.html'"></ng-include>
         </tab>
         <tab heading="Raw">
-        <ng-include src="'rawView.html'">
+          <ng-include src="'rawView.html'"></ng-include>
         </tab>
       </tabset>
     </div>

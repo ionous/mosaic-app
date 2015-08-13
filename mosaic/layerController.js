@@ -2,80 +2,45 @@
 
 
 //
-// generate mouse coordinates for canvases
-//
 angular.module('mosaic')
   .controller('LayerController',
-    function($element, $log, $scope) {
-      $scope.coords = {
-        x: 0,
-        y: 0
-      };
-      $scope.mouse = {
-        x: 0,
-        y: 0
-      };
-      $scope.step = {
-        size: 32,
-      };
+    function(MapService, StepService, $scope) {
 
-      // return clipped x,y position on the passed canvas in steps of gran.
-      $scope.canvasPos = function(canvas, cx, cy, gran) {
-        var rect = canvas.getBoundingClientRect();
-        var right = canvas.width;
-        var bottom = canvas.height
+      $scope.layerSize = MapService.layerSize;
+      $scope.layerSizes = ["auto", pt(32), pt(8), pt(1)];
+      $scope.coords = pt(0);
+      $scope.mouse = pt(0);
 
-        //var sx = cw / canvas.clientWidth;
-        //var sy = ch / canvas.clientHeight;
-
-        var x = Math.floor(cx - rect.left);
-        var y = Math.floor(cy - rect.top);
-        var clippedX = x < 0;
-        if (clippedX) {
-          x = 0;
+      $scope.sizeId = function(size) {
+        if (size != "auto") {
+          size = size.x === size.y ? size.x : '' + size.x + '-' + size.y;
         }
-        var clippedY = y < 0;
-        if (clippedY) {
-          y = 0;
-        }
-        if (gran) {
-          x = Math.floor(0.5 + x / gran) * gran;
-          y = Math.floor(0.5 + y / gran) * gran;
-          right -= gran;
-          bottom -= gran;
-        } else {
-          right -= 1;
-          bottom -= 1;
-        }
-        if (x>right) {
-          x= right;
-          clippedX= true;
-        }
-        if (y>bottom) {
-          y= bottom;
-          clippedY= true;
-        }
-        return {
-          x: x,
-          y: y,
-          clippedX: clippedX,
-          clippedY: clippedY,
-        };
+        return size;
       }
-
+      $scope.sizeLabel = function(size) {
+        if (size != "auto") {
+          size = size.x === size.y ? size.x : '' + size.x + '*' + size.y;
+        }
+        return size;
+      }
       // record the current mouse and step positions.
+      // FIX: might be better as a filter ( one for canvasPos, one for granulation. )
       $scope.canvasMove = function(evt) {
         var el = evt.target;
-        var pos = $scope.canvasPos(el, evt.clientX, evt.clientY);
+        var mouse = {
+          x: evt.clientX,
+          y: evt.clientY
+        };
+        var pos = StepService.canvasPos(el, mouse);
         $scope.mouse = {
           x: pos.x,
           y: pos.y
         };
-        var size = $scope.step.size;
-        var gran = $scope.canvasPos(el, evt.clientX, evt.clientY, size);
+        var step = StepService.dragStep();
+        var gran = StepService.canvasPos(el, mouse, step);
         $scope.coords = {
-          x: 1 + gran.x / size,
-          y: 1 + gran.y / size
+          x: 1 + gran.x / (step ? step.x : 1),
+          y: 1 + gran.y / (step ? step.y : 1)
         };
       };
     });

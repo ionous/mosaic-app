@@ -4,7 +4,7 @@
 // ( requires LayerController for step size and canvas pos )
 angular.module('mosaic')
   .controller('DropController',
-    function(DragService, MapService, $element, $scope) {
+    function(DragService, StepService, MapService, $element) {
       var canvas = $element[0];
       var lastPos = {
         x: 0,
@@ -15,24 +15,29 @@ angular.module('mosaic')
       var lastRot = 0;
       var lastTile;
       var lastIndex = -1;
+
       var start = function(tileId, tileIdx) {
-        $scope.step.size = DragService.sprite.width;
         lastTile = tileId;
         lastIndex = tileIdx;
       };
+
       var stop = function() {
         // place the tile into the map:
         if (!lastPos.clippedY && !lastPos.clippedX) {
-          MapService.place(lastTile, lastIndex, lastPos, lastRot);
+          var dragStep = StepService.dragStep();
+          var layer= MapService.getBestLayer(dragStep);
+          layer.place(lastPos, [lastTile, lastIndex, lastRot]);
         }
         // clear the draw overlay:
         var ctx = canvas.getContext("2d");
         DragService.sprite.clearAt(ctx, lastPos);
       };
-      var move = function(dragPos, dragCanvas) {
-        var newPos = $scope.canvasPos(canvas, dragPos.x, dragPos.y, $scope.step.size);
+
+      var move = function(dragPos) {
+        var dragStep = StepService.dragStep();
+        var newPos = StepService.canvasPos(canvas, dragPos, dragStep);
         // did we actually move:
-        if ((lastPos !== newPos) || (lastRot!= dragPos.rot)) {
+        if ((lastPos !== newPos) || (lastRot != dragPos.rot)) {
           // clear the old position
           var ctx = canvas.getContext("2d");
           DragService.sprite.clearAt(ctx, lastPos);

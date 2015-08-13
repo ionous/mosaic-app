@@ -1,5 +1,6 @@
 'use strict';
 
+// get raw map data.
 angular.module('mosaic')
   .controller('RawController',
     function(MapService, $log, $rootScope, $scope) {

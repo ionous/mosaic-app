@@ -94,12 +94,14 @@ WebKit inertia scrolling is being added here for any present/future devices that
   position: relative;
 }
 
-#viewport {
-  border: 1px solid red;
+.mapLayer {
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 #scratch {
-  position: absolute;
+  position: relative;
   left: 0;
   top: 0;
   border: 1px solid black;
@@ -116,6 +118,7 @@ WebKit inertia scrolling is being added here for any present/future devices that
   -o-filter: grayscale(100%);
   filter: gray;
 }
+
 
 /*
 https://angular-ui.github.io/bootstrap/ 
