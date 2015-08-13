@@ -27,7 +27,7 @@ var Sprite = function(tile, index) {
 Sprite.prototype.image = function() {
   if (!this._image) {
     var img = new Image();
-    img.src = '/images/' + this.tile.id + '.png'; //tile.attr['src']
+    img.src = this.tile.attr['src'];
     this._image = img;
   }
   return this._image;
@@ -84,8 +84,7 @@ angular.module('mosaic')
         getTiles: function() {
           var deferred = $q.defer();
           //
-          var url = '/tiles';
-          $http.get(url).then(function(resp) {
+          $http.get('tiles').then(function(resp) {
             var tiles = {};
             JsonService.parseMultiDoc(resp.data, "getTileList",
               function(obj) {

@@ -1,6 +1,10 @@
 <div ng-controller="TileListController">
   <div ng-repeat="tile in tiles" class="tile-outer">
-    {{tile.id}}
+    <span style="float:left">{{tile.id}}</span>
+    <span style="float:right">
+		<button popover-template="'tileInfo.html'" popover-title="Tile: {{tile.id}}" type="button" class="btn btn-default"><i class="fa fa-info-circle"></i> </button>
+		</span>
+    <div style="clear: both;"></div>
     <div>
       <div ng-repeat="sprite in tile.attr.sprites" ng-class="['T'+sprite.size, currentTile === sprite ? 'selectedTile' : 'normalTile']">
         <div ng-class="['tileImage', tile.id,'T'+sprite.size+'-'+sprite.y+'-'+sprite.x]" ng-mousedown="onDown($event,tile,$index)">
